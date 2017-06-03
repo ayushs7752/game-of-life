@@ -1,3 +1,3 @@
 # game-project
 
-Board game in Java 
+Game of Life board implementation in Java 

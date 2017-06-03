@@ -1,4 +1,4 @@
-package minesweeper;
+package gol;
 
 /**
  * a immutable data type representing individual cell of GameBoard

@@ -1,7 +1,7 @@
 /* Copyright (c) 2007-2017 MIT 6.005/6.031 course staff, all rights reserved.
  * Redistribution of original or derived work requires permission of course staff.
  */
-package minesweeper;
+package gol;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Queue;
-
-import minesweeper.Cell.State;
 
 /**
  * Multi-player Minesweeper server.
@@ -158,7 +156,7 @@ public class GameServer {
 		String regex = "(look)|(help)|(bye)|" + "(dig -?\\d+ -?\\d+)|(flag -?\\d+ -?\\d+)|(deflag -?\\d+ -?\\d+)";
 		if (!input.matches(regex)) {
 			// invalid input
-			return Optional.of(this.board.help());
+//			return Optional.of(this.board.help());
 		}
 		String[] tokens = input.split(" ");
 		if (tokens[0].equals("look")) {
@@ -166,20 +164,20 @@ public class GameServer {
 
 		} else if (tokens[0].equals("help")) {
 			// 'help' request
-			return Optional.of(this.board.help());
+//			return Optional.of(this.board.help());
 		} else if (tokens[0].equals("bye")) {
 			return Optional.empty();
-		} else {
-			int x = Integer.parseInt(tokens[1]);
-			int y = Integer.parseInt(tokens[2]);
-			if (tokens[0].equals("dig")) {
-				return Optional.of(this.board.dig(x, y));
-			} else if (tokens[0].equals("flag")) {
-				return Optional.of(this.board.flag(x, y));
-
-			} else if (tokens[0].equals("deflag")) {
-				return Optional.of(this.board.deflag(x, y));
-			}
+//		} else {
+//			int x = Integer.parseInt(tokens[1]);
+//			int y = Integer.parseInt(tokens[2]);
+//			if (tokens[0].equals("dig")) {
+//				return Optional.of(this.board.dig(x, y));
+//			} else if (tokens[0].equals("flag")) {
+//				return Optional.of(this.board.flag(x, y));
+//
+//			} else if (tokens[0].equals("deflag")) {
+//				return Optional.of(this.board.deflag(x, y));
+//			}
 		}
 
 		throw new UnsupportedOperationException();
@@ -355,12 +353,12 @@ public class GameServer {
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < col; ++j) {
 
-					int bombPresent = Integer.parseInt(fileMapping.get(count));
+					int isAlive= Integer.parseInt(fileMapping.get(count));
 
 					count += 1;
 
-					if (bombPresent == 1) {
-						board.getBoard().get(i).set(j, new Cell(j, i, State.UNTOUCHED, true));
+					if (isAlive== 1) {
+						board.getBoard().get(i).set(j, new Cell(j, i, true));
 					}
 				}
 			}

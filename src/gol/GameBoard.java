@@ -1,7 +1,7 @@
 /* Copyright (c) 2007-2017 MIT 6.005/6.031 course staff, all rights reserved.
  * Redistribution of original or derived work requires permission of course staff.
  */
-package minesweeper;
+package gol;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ public class GameBoard {
 	private final int numRows;
 	private final int numColumns;
 
-	private final List<List<Cell>> board;
+	private List<List<Cell>> board;
 
 	/*
 	 * AF(numRows,numColumns, board) = a minesweeper board of size numRows x
@@ -60,17 +60,15 @@ public class GameBoard {
 			}
 		}
 		board = new ArrayList<>();
-		List<List<Cell>> boardSync = Collections.synchronizedList(board);
 
 		for (int i = 0; i < rows; ++i) {
 
 			List<Cell> rowArray = new ArrayList<Cell>();
-			List<Cell> rowArraySync = Collections.synchronizedList(rowArray);
 
 			for (int j = 0; j < columns; ++j) {
-				rowArraySync.add(new Cell(j, i, isAlive));
+				rowArray.add(new Cell(j, i, isAlive));
 			}
-			boardSync.add(rowArray);
+			board.add(rowArray);
 		}
 
 	}
@@ -81,7 +79,7 @@ public class GameBoard {
 	 * @return number of rows in this board
 	 */
 
-	public synchronized int numRows() {
+	public int numRows() {
 		return this.numRows;
 	}
 
@@ -90,7 +88,7 @@ public class GameBoard {
 	 * 
 	 * @return number of columns in this board
 	 */
-	public synchronized int numColumns() {
+	public int numColumns() {
 		return this.numColumns;
 	}
 
@@ -100,7 +98,7 @@ public class GameBoard {
 	 * @return board of this minesweeper
 	 */
 
-	public synchronized List<List<Cell>> getBoard() {
+	public List<List<Cell>> getBoard() {
 		return this.board;
 	}
 
@@ -237,6 +235,64 @@ public class GameBoard {
 
 			this.board.get(y).set(x, new Cell(x, y, true));
 		}
+	}
+	
+	/**
+	 * update a given with the following rules-- 
+	 * 
+	 * Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+	 * Any live cell with two or three live neighbours lives on to the next generation.
+	 * Any live cell with more than three live neighbours dies, as if by overpopulation.
+	 * Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+	 * 
+	 * @return true iff the cell is alive in the next step
+	 */
+	
+	public boolean cellUpdate(Cell c) { 
+		Set <Cell> adj = adjacentCells(c.getX(), c.getY()); 
+		int countAliveAdjacent = 0; 
+		for (Cell cell : adj) {
+			if (cell.isAlive()) { 
+				countAliveAdjacent+=1; 
+			}
+		}
+		
+		if (c.isAlive() && countAliveAdjacent < 2) {
+			return false; 
+		}
+		
+		if (c.isAlive() && (countAliveAdjacent == 2 || countAliveAdjacent == 3)) {
+			return true; 
+		}
+		
+		if (c.isAlive() && countAliveAdjacent > 3) {
+			return false; 
+		}
+		
+		if (c.isAlive() == false && countAliveAdjacent == 3) {
+			return true; 
+		}
+		
+		return true;
+		
+	}
+	
+	public void updateBoard() { 
+		List<List<Cell>> boardTemp = new ArrayList<>();
+		int rows = this.numRows; 
+		int columns = this.numColumns;
+		
+		for (int i = 0; i < rows; ++i) {
+
+			List<Cell> rowArray = new ArrayList<Cell>();
+
+			for (int j = 0; j < columns; ++j) {
+				boolean isAlive = cellUpdate(this.getBoard().get(j).get(i));
+				rowArray.add(new Cell(j, i, isAlive));
+			}
+			boardTemp.add(rowArray);
+		}
+		this.board = boardTemp;
 	}
 
 }
