@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import minesweeper.Cell.State;
-
 /**
  * a mutable thread-safe data type representing a minesweeper GameBoard
  */
@@ -47,7 +45,7 @@ public class GameBoard {
 	public GameBoard(int rows, int columns, boolean random) {
 		this.numRows = rows;
 		this.numColumns = columns;
-		boolean hasBomb = false;
+		boolean isAlive = false;
 
 		if (random) {
 
@@ -58,7 +56,7 @@ public class GameBoard {
 			Random randomizer = new Random();
 
 			if (randomList.get(randomizer.nextInt(4)) == 1) {
-				hasBomb = true;
+				isAlive = true;
 			}
 		}
 		board = new ArrayList<>();
@@ -70,7 +68,7 @@ public class GameBoard {
 			List<Cell> rowArraySync = Collections.synchronizedList(rowArray);
 
 			for (int j = 0; j < columns; ++j) {
-				rowArraySync.add(new Cell(j, i, State.UNTOUCHED, hasBomb));
+				rowArraySync.add(new Cell(j, i, isAlive));
 			}
 			boardSync.add(rowArray);
 		}
@@ -103,7 +101,7 @@ public class GameBoard {
 	 */
 
 	public synchronized List<List<Cell>> getBoard() {
-		return Collections.synchronizedList(this.board);
+		return this.board;
 	}
 
 	/**
@@ -115,7 +113,7 @@ public class GameBoard {
 	 *            y coordinate of given cell
 	 * @return set of valid adjacent cells
 	 */
-	public synchronized Set<Cell> adjacentCells(int x, int y) {
+	public Set<Cell> adjacentCells(int x, int y) {
 		Set<Cell> adjacentCells = new HashSet<>();
 
 		try {
@@ -171,13 +169,13 @@ public class GameBoard {
 	}
 
 	/**
-	 * return a viewable representation of GameBoard according to the
-	 * specs of ps4
+	 * return a viewable representation of GameBoard according to the specs of
+	 * ps4
 	 * 
 	 * @return view of the current GameBoard
 	 */
 
-	public synchronized String look() {
+	public String look() {
 
 		String boardView = "";
 		for (int i = 0; i < this.numRows; ++i) {
@@ -188,29 +186,14 @@ public class GameBoard {
 				Cell thisCell = this.board.get(i).get(j);
 				String cellView = "";
 
-				if (thisCell.getState().equals(State.UNTOUCHED)) {
-					cellView = "-";
+				if (thisCell.isAlive()) {
+					cellView = "#";
 				}
 
-				if (thisCell.getState().equals(State.FLAGGED)) {
-					cellView = "F";
+				if (!(thisCell.isAlive())) {
+					cellView = " ";
 				}
 
-				if (thisCell.getState().equals(State.DUG)) {
-					Set<Cell> adjacentCells = this.adjacentCells(j, i);
-					int countBombs = 0;
-					for (Cell c : adjacentCells) {
-						if (c.hasBomb()) {
-							countBombs += 1;
-						}
-					}
-					if (countBombs == 0) {
-						cellView = " ";
-					} else {
-						cellView = Integer.toString(countBombs);
-					}
-
-				}
 				if (j == this.numColumns - 1) {
 					rowView += cellView;
 				} else {
@@ -227,134 +210,33 @@ public class GameBoard {
 	}
 
 	/**
-	 * recursively dig minesweeper cell according to standard rules as per the spec of ps4
-	 * @param x x coordinate of minesweeper square
-	 * @param y y coordinate of minesweeper square
-	 */
-	public synchronized String dig(int x, int y) {
-
-		if (x > this.numColumns - 1 || x < 0 || y < 0 || y > this.numRows - 1) {
-			return this.look();
-		}
-
-		Cell thisCell = this.board.get(y).get(x);
-
-		if (!(thisCell.getState().equals(State.UNTOUCHED))) {
-			return this.look();
-		}
-
-		if (thisCell.getState().equals(State.UNTOUCHED)) {
-			this.board.get(y).set(x, new Cell(x, y, State.DUG, thisCell.hasBomb()));
-
-			if (this.board.get(y).get(x).hasBomb()) {
-
-				this.board.get(y).set(x, new Cell(x, y, State.DUG, false));
-
-				digRecursive(x, y);
-				return this.boom();
-
-			}
-
-		}
-
-		return this.look();
-
-	}
-
-	/**
-	 * helper function for recursive part of dig method--If the square x,y has
-	 * no neighbor squares with bombs, then for each of x,y’s untouched neighbor
-	 * squares, change said square to dug and repeat this step (not the entire
-	 * DIG procedure) recursively for said neighbor square unless said neighbor
-	 * square was already dug before said change.
-	 * 
-	 * @param x
-	 *            x coordinate of given Cell
-	 * @param y
-	 *            y coordinate of given Cell
-	 */
-	private synchronized void digRecursive(int x, int y) {
-
-		Set<Cell> adjacentCells = this.adjacentCells(x, y);
-
-		boolean noAdjacentBombs = true;
-		for (Cell c : adjacentCells) {
-			if (c.hasBomb()) {
-				noAdjacentBombs = false;
-			}
-		}
-
-		if (noAdjacentBombs) {
-			for (Cell c : adjacentCells) {
-				if (c.getState().equals(State.UNTOUCHED)) {
-
-					this.board.get(c.getY()).set(c.getX(),
-							new Cell(c.getX(), c.getY(), State.DUG, this.board.get(c.getY()).get(c.getX()).hasBomb()));
-
-					digRecursive(c.getX(), c.getY());
-				}
-
-			}
-		}
-		return;
-	}
-
-	/**
-	 * deflag the given Cell
+	 * kill the given Cell
 	 * 
 	 * @param x
 	 *            x coordinate of the given Cell
 	 * @param y
 	 *            y coordinate of the given cell
-	 * @return Board view of the current gameBoard
 	 */
-	public synchronized String deflag(int x, int y) {
-		if (x < this.numColumns && y < this.numRows && this.board.get(y).get(x).getState().equals(State.FLAGGED)) {
+	public void kill(int x, int y) {
+		if (x < this.numColumns && y < this.numRows) {
+			this.board.get(y).set(x, new Cell(x, y, false));
 
-			this.board.get(y).set(x, new Cell(x, y, State.UNTOUCHED, this.board.get(y).get(x).hasBomb()));
-
-			return this.look();
 		}
-		return this.look();
 	}
 
 	/**
-	 * flag the given Cqell
+	 * make the given cell alive
 	 * 
 	 * @param x
 	 *            x coordinate of the given Cell
 	 * @param y
 	 *            y coordinate of the given cell
-	 * @return Board view of the current gameBoard
 	 */
-	public synchronized String flag(int x, int y) {
-		if (x < this.numColumns && y < this.numRows && this.board.get(y).get(x).getState().equals(State.UNTOUCHED)) {
+	public void produce(int x, int y) {
+		if (x < this.numColumns && y < this.numRows) {
 
-			this.board.get(y).set(x, new Cell(x, y, State.FLAGGED, this.board.get(y).get(x).hasBomb()));
-
-			return this.look();
+			this.board.get(y).set(x, new Cell(x, y, true));
 		}
-		return this.look();
 	}
-
-	/**
-	 * send a boom message 
-	 * @return boom message
-	 */
-	public synchronized String boom() {
-		return "BOOM!\n";
-
-	}
-	/**
-	 * send a help message
-	 * @return help message
-	 */
-	public synchronized String help() {
-
-		return "Valid Commands include: DIG, LOOK, FLAG, DEFLAG,BYE \n";
-	}
-	
-
-	
 
 }
