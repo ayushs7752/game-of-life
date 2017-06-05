@@ -45,31 +45,41 @@ public class GameBoard {
 	public GameBoard(int rows, int columns, boolean random) {
 		this.numRows = rows;
 		this.numColumns = columns;
-		boolean isAlive = false;
 
-		if (random) {
-
-			List<Integer> randomList = new ArrayList<>();
-
-			randomList.addAll(Arrays.asList(1, 2, 3, 4));
-
-			Random randomizer = new Random();
-
-			if (randomList.get(randomizer.nextInt(4)) == 1) {
-				isAlive = true;
-			}
-		}
 		board = new ArrayList<>();
 
-		for (int i = 0; i < rows; ++i) {
-
-			List<Cell> rowArray = new ArrayList<Cell>();
-
-			for (int j = 0; j < columns; ++j) {
-				rowArray.add(new Cell(j, i, isAlive));
+		if (random) {
+			for (int i = 0; i < rows; ++i) {
+				List<Cell> rowArray = new ArrayList<Cell>();
+				for (int j = 0; j < columns; ++j) {
+					rowArray.add(new Cell(j, i, randomAlive()));
+				}
+				board.add(rowArray);
 			}
-			board.add(rowArray);
 		}
+
+		else {
+			for (int i = 0; i < rows; ++i) {
+				List<Cell> rowArray = new ArrayList<Cell>();
+				for (int j = 0; j < columns; ++j) {
+					rowArray.add(new Cell(j, i, false));
+				}
+				board.add(rowArray);
+			}
+		}
+
+	}
+
+	public boolean randomAlive() {
+
+		List<Integer> randomList = new ArrayList<>();
+		randomList.addAll(Arrays.asList(1, 2, 3, 4));
+		Random randomizer = new Random();
+
+		if (randomList.get(randomizer.nextInt(4)) == 1) {
+			return true;
+		}
+		return false;
 
 	}
 
@@ -185,17 +195,17 @@ public class GameBoard {
 				String cellView = "";
 
 				if (thisCell.isAlive()) {
-					cellView = "#";
+					cellView = "A";
 				}
 
 				if (!(thisCell.isAlive())) {
-					cellView = " ";
+					cellView = "D";
 				}
 
 				if (j == this.numColumns - 1) {
 					rowView += cellView;
 				} else {
-					rowView += cellView + " ";
+					rowView += cellView + "";
 				}
 
 			}
@@ -236,52 +246,55 @@ public class GameBoard {
 			this.board.get(y).set(x, new Cell(x, y, true));
 		}
 	}
-	
+
 	/**
-	 * update a given with the following rules-- 
+	 * update a given with the following rules--
 	 * 
-	 * Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-	 * Any live cell with two or three live neighbours lives on to the next generation.
-	 * Any live cell with more than three live neighbours dies, as if by overpopulation.
-	 * Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+	 * Any live cell with fewer than two live neighbours dies, as if caused by
+	 * underpopulation. Any live cell with two or three live neighbours lives on
+	 * to the next generation. Any live cell with more than three live
+	 * neighbours dies, as if by overpopulation. Any dead cell with exactly
+	 * three live neighbours becomes a live cell, as if by reproduction.
 	 * 
 	 * @return true iff the cell is alive in the next step
 	 */
-	
-	public boolean cellUpdate(Cell c) { 
-		Set <Cell> adj = adjacentCells(c.getX(), c.getY()); 
-		int countAliveAdjacent = 0; 
+
+	public boolean cellUpdate(Cell c) {
+		Set<Cell> adj = adjacentCells(c.getX(), c.getY());
+		int countAliveAdjacent = 0;
 		for (Cell cell : adj) {
-			if (cell.isAlive()) { 
-				countAliveAdjacent+=1; 
+			if (cell.isAlive()) {
+				countAliveAdjacent += 1;
 			}
 		}
-		
-		if (c.isAlive() && countAliveAdjacent < 2) {
-			return false; 
+
+		if (c.isAlive()) {
+			if (countAliveAdjacent < 2) {
+				return false;
+			}
+			if (countAliveAdjacent == 2 || countAliveAdjacent == 3) {
+				return true;
+			}
+			if (countAliveAdjacent > 3) {
+				return false;
+			}
+
+		} else {
+			if (countAliveAdjacent == 3) {
+				return true;
+
+			}
 		}
-		
-		if (c.isAlive() && (countAliveAdjacent == 2 || countAliveAdjacent == 3)) {
-			return true; 
-		}
-		
-		if (c.isAlive() && countAliveAdjacent > 3) {
-			return false; 
-		}
-		
-		if (c.isAlive() == false && countAliveAdjacent == 3) {
-			return true; 
-		}
-		
-		return true;
-		
+
+		return false;
+
 	}
-	
-	public void updateBoard() { 
+
+	public void updateBoard() {
 		List<List<Cell>> boardTemp = new ArrayList<>();
-		int rows = this.numRows; 
+		int rows = this.numRows;
 		int columns = this.numColumns;
-		
+
 		for (int i = 0; i < rows; ++i) {
 
 			List<Cell> rowArray = new ArrayList<Cell>();
@@ -292,6 +305,7 @@ public class GameBoard {
 			}
 			boardTemp.add(rowArray);
 		}
+
 		this.board = boardTemp;
 	}
 
