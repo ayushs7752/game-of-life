@@ -195,11 +195,11 @@ public class GameBoard {
 				String cellView = "";
 
 				if (thisCell.isAlive()) {
-					cellView = "A";
+					cellView = "#";
 				}
 
 				if (!(thisCell.isAlive())) {
-					cellView = "D";
+					cellView = " ";
 				}
 
 				if (j == this.numColumns - 1) {
@@ -246,6 +246,21 @@ public class GameBoard {
 			this.board.get(y).set(x, new Cell(x, y, true));
 		}
 	}
+	
+	public int countAliveAdjacent(Cell c) {
+		Set<Cell> adj = adjacentCells(c.getX(), c.getY());
+		int countAliveAdjacent = 0;
+		for (Cell cell : adj) {
+			if (cell.isAlive()) {
+				countAliveAdjacent += 1;
+			}
+		}
+		return countAliveAdjacent;
+	}
+	
+	public Cell getCell(int x, int y) {
+		return this.getBoard().get(y).get(x); 
+	}
 
 	/**
 	 * update a given with the following rules--
@@ -258,15 +273,10 @@ public class GameBoard {
 	 * 
 	 * @return true iff the cell is alive in the next step
 	 */
+	
 
 	public boolean cellUpdate(Cell c) {
-		Set<Cell> adj = adjacentCells(c.getX(), c.getY());
-		int countAliveAdjacent = 0;
-		for (Cell cell : adj) {
-			if (cell.isAlive()) {
-				countAliveAdjacent += 1;
-			}
-		}
+		int countAliveAdjacent = countAliveAdjacent(c);
 
 		if (c.isAlive()) {
 			if (countAliveAdjacent < 2) {
@@ -281,6 +291,7 @@ public class GameBoard {
 
 		} else {
 			if (countAliveAdjacent == 3) {
+				System.out.println("should come here");
 				return true;
 
 			}
@@ -300,12 +311,14 @@ public class GameBoard {
 			List<Cell> rowArray = new ArrayList<Cell>();
 
 			for (int j = 0; j < columns; ++j) {
-				boolean isAlive = cellUpdate(this.getBoard().get(j).get(i));
+				boolean isAlive = cellUpdate(this.getCell(i, j));
+				if (isAlive) {
+					System.out.println("here" + i + " " + j );
+				}
 				rowArray.add(new Cell(j, i, isAlive));
 			}
 			boardTemp.add(rowArray);
 		}
-
 		this.board = boardTemp;
 	}
 
