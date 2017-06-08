@@ -5,7 +5,6 @@ package gol;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -291,7 +290,6 @@ public class GameBoard {
 
 		} else {
 			if (countAliveAdjacent == 3) {
-				System.out.println("should come here");
 				return true;
 
 			}
@@ -311,9 +309,8 @@ public class GameBoard {
 			List<Cell> rowArray = new ArrayList<Cell>();
 
 			for (int j = 0; j < columns; ++j) {
-				boolean isAlive = cellUpdate(this.getCell(i, j));
+				boolean isAlive = cellUpdate(this.getCell(j, i));
 				if (isAlive) {
-					System.out.println("here" + i + " " + j );
 				}
 				rowArray.add(new Cell(j, i, isAlive));
 			}

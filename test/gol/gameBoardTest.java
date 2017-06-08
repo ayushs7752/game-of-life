@@ -70,7 +70,7 @@ public class gameBoardTest {
 
 	@Test
 	public void reproduceTest() {
-		GameBoard board = new GameBoard(10, 10, false);
+		GameBoard board = new GameBoard(20, 20, false);
 		board.produce(4, 4);
 		board.produce(5, 4);
 		board.produce(6, 4);
