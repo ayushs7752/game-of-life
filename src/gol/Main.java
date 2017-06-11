@@ -94,9 +94,9 @@ public class Main {
 
 		Timer timer = new Timer();
 
-		GameBoard board = boardFromFile(Optional.of(new File("src/board/glider.txt")), -1, -1);
+		GameBoard board = boardFromFile(Optional.of(new File("src/board/gliderGun.txt")), -1, -1);
 
-		timer.schedule(new runGame(board), 0, 400);
+		timer.schedule(new runGame(board), 0, 200);
 
 	}
 
