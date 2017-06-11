@@ -12,9 +12,10 @@ public class runGame extends TimerTask {
 
 	@Override
 	public void run() {
-		this.gameBoard.updateBoard();
 		System.out.println(this.gameBoard.look());
 		System.out.println("-------------------------------------");
+		this.gameBoard.updateBoard();
+		
 
 	}
 
