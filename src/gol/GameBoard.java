@@ -9,35 +9,25 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * a mutable thread-safe data type representing a minesweeper GameBoard
+ * a mutable thread-safe data type representing a Game of Life GameBoard
  */
 public class GameBoard {
 
 	private final int numRows;
 	private final int numColumns;
-
 	private List<List<Cell>> board;
 
-	/*
-	 * AF(numRows,numColumns, board) = a minesweeper board of size numRows x
-	 * numColumns
-	 * 
-	 * rep invariant: numRows, numColumns > 0
-	 * 
-	 * safety from rep exposure: all fields are private final and mutators are
-	 * used within the internal implementation only.
-	 */
-
 	/**
-	 * initialize a GameBoard instance with either no bombs or 0.25 prob bombs
-	 * (depending on random)
+	 * initialize a GameBoard instance
+	 * 
 	 * 
 	 * @param rows
 	 *            number of rows in board
 	 * @param columns
 	 *            number of columns in board
 	 * @param random
-	 *            whether to put random bombs with prob 0.25 or not at all
+	 *            whether to randomly assign living cells with probability
+	 *            0.25/cell
 	 */
 	public GameBoard(int rows, int columns, boolean random) {
 		this.numRows = rows;
@@ -67,6 +57,11 @@ public class GameBoard {
 
 	}
 
+	/**
+	 * helper method to randomly decide whether to have the cell
+	 * 
+	 * @return true == alive ; false == dead
+	 */
 	public boolean randomAlive() {
 
 		List<Integer> randomList = new ArrayList<>();
@@ -175,8 +170,6 @@ public class GameBoard {
 
 	/**
 	 * return a viewable representation of GameBoard according to the specs of
-	 * ps4
-	 * 
 	 * @return view of the current GameBoard
 	 */
 
@@ -244,6 +237,12 @@ public class GameBoard {
 		}
 	}
 	
+	/**
+	 * helper method to count alive adjacent cells for the given cell
+	 * @param c given Cell 
+	 * @return number of alive adjacent cells 
+	 */
+
 	public int countAliveAdjacent(Cell c) {
 		Set<Cell> adj = adjacentCells(c.getX(), c.getY());
 		int countAliveAdjacent = 0;
@@ -254,9 +253,15 @@ public class GameBoard {
 		}
 		return countAliveAdjacent;
 	}
-	
+
+	/**
+	 * get Cell 
+	 * @param x x-coordinate of the cell
+	 * @param y y-coordinate of the cell
+	 * @return the Cell reference to the given coordinates
+	 */
 	public Cell getCell(int x, int y) {
-		return this.getBoard().get(y).get(x); 
+		return this.getBoard().get(y).get(x);
 	}
 
 	/**
@@ -270,7 +275,6 @@ public class GameBoard {
 	 * 
 	 * @return true iff the cell is alive in the next step
 	 */
-	
 
 	public boolean cellUpdate(Cell c) {
 		int countAliveAdjacent = countAliveAdjacent(c);
@@ -296,7 +300,10 @@ public class GameBoard {
 		return false;
 
 	}
-
+	
+	/**
+	 * update the entire GameBoard
+	 */
 	public void updateBoard() {
 		List<List<Cell>> boardTemp = new ArrayList<>();
 		int rows = this.numRows;

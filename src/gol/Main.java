@@ -12,7 +12,12 @@ import java.util.Timer;
 public class Main {
 
 	private static final int DEFAULT_SIZE = 20;
-
+	
+	/**
+	 * helper method to process the input file 
+	 * @param f input file to read initial board configuration from
+	 * @return list.size() == 3, list.get(0) = sizeX; list.get(1) = sizeY; list.get(2) = string of length (sizeX x sizeY) where string.charAt(ixj) = state of cell at jxi              
+	 */
 
 	private static List<String> processFile(File f) {
 		String text = "";
@@ -49,11 +54,21 @@ public class Main {
 		return output;
 
 	}
-
+	/**
+	 * generate initial GameBoard configuration 
+	 * @param file file containing seeded configuration
+	 * @param sizeX 
+	 * @param sizeY
+	 * @return GameBoard instance based on the parameters given
+	 */
 	public static GameBoard boardFromFile(Optional<File> file, int sizeX, int sizeY) {
 		GameBoard board;
 
-		if (file.isPresent()) {
+		if (sizeX > 0 && sizeY > 0) {
+
+			board = new GameBoard(sizeY, sizeX, true);
+
+		} else if (file.isPresent()) {
 
 			List<String> fileMapping = processFile(file.get());
 
@@ -78,25 +93,26 @@ public class Main {
 
 		}
 
-		else if (sizeX > 0 && sizeY > 0) {
-
-			board = new GameBoard(sizeY, sizeX, true);
-
-		}
-
 		else {
 			board = new GameBoard(DEFAULT_SIZE, DEFAULT_SIZE, true);
 		}
 		return board;
 	}
-
+	
+	/**
+	 * main method running the simulation in console
+	 * @param args
+	 */
 	public static void main(String[] args) {
 
 		Timer timer = new Timer();
 
-		GameBoard board = boardFromFile(Optional.of(new File("src/board/gliderGun.txt")), -1, -1);
+		// GameBoard board = boardFromFile(Optional.of(new
+		// File("src/board/gliderGun.txt")), -1, -1);
 
-		timer.schedule(new runGame(board), 0, 200);
+		GameBoard board = boardFromFile(Optional.of(new File("src")), 50, 20);
+
+		timer.schedule(new runGame(board), 0, 50);
 
 	}
 
